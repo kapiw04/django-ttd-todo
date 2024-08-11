@@ -7,4 +7,4 @@ class TodoItem(models.Model):
   title = models.CharField(max_length=30)
   desc = models.CharField(max_length=500)
   date = models.DateField(auto_now=True)
-  completed = models.BooleanField()
+  completed = models.BooleanField(default=False)
