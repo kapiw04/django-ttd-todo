@@ -66,18 +66,21 @@ def test_crud_todo():
     input_desc.send_keys(updated_todo["description"])
 
     browser.find_element(By.ID, "confirm-update-button").click()
-    browser.find_element(By.ID, "go-back-button").click()
+    # browser.find_element(By.ID, "go-back-button").click()
 
     browser.implicitly_wait(5)
     todos_table = browser.find_element(By.ID, "todos-table")
     rows = todos_table.find_elements(By.TAG_NAME, "tr")
     assert updated_todo["title"] in rows[-1].text
-    pytest.fail("Finish Test")
 
     #* delete
     rows_count = len(rows)
-    delete_button = rows[-1].find_element(By.ID, "delete-button")
+    details_button = rows[-1].find_element(By.ID, "details-button")
+    details_button.click()
+    browser.implicitly_wait(5)
+    delete_button = browser.find_element(By.ID, "delete-button")
     delete_button.click()
+    todos_table = browser.find_element(By.ID, "todos-table")
     rows = todos_table.find_elements(By.TAG_NAME, "tr")
     assert rows_count - 1 == len(rows)
 

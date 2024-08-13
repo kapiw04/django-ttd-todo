@@ -46,5 +46,11 @@
   </div>
 </div>
 
+<form action="{% url 'delete' id=task.id %}" method="post" style="display: inline;">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger" id="delete-button">Delete</button>
+</form>
+
+
 <a id="go-back-button" href="{% url 'index' %}">Back to list</a>
 {% endblock %}

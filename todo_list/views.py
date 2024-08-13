@@ -1,9 +1,8 @@
 from typing import Any
+from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
-from django.views.generic import TemplateView, DetailView, View
-
+from django.views.generic import TemplateView, DetailView, View, DeleteView
 from todo_list.models import TodoItem
-
 from .forms import TodoItemForm
 
 # Create your views here.
@@ -52,8 +51,12 @@ class UpdateTodoItemView(View):
       task.desc = form.cleaned_data["desc"]
       task.save()
 
-    return redirect("details", id=pk)
+    return redirect("index")
 
+class TodoItemDeleteView(DeleteView):
+  model = TodoItem  
+  success_url = reverse_lazy("index")
+  pk_url_kwarg = "id"
 
 class TodoItemDetailView(DetailView):
   model = TodoItem
