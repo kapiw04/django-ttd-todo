@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block content %}
+<h1>{{ task.title }}</h1>
+<p>{{ task.desc }}</p>
+
+<button
+  id="open-update-button"
+  type="button"
+  class="btn btn-primary"
+  data-bs-toggle="modal"
+  data-bs-target="#update-task-modal"
+>
+  Edit
+</button>
+
+<!-- Add modal -->
+<div
+  class="modal fade"
+  id="update-task-modal"
+  tabindex="-1"
+  aria-labelledby="updateModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="updateModalLabel">Edit</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form action="#" method="post">
+          {% csrf_token %} {{ form }}
+          <input
+            class="btn btn-primary mt-3"
+            id="confirm-update-button"
+            type="submit"
+            value="Edit"
+          />
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a id="go-back-button" href="{% url 'index' %}">Back to list</a>
+{% endblock %}

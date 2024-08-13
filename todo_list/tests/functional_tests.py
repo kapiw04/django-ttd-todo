@@ -10,7 +10,9 @@ def test_crud_todo():
     browser.get("http://localhost:8000")
 
     assert "To-Do List" in browser.title
-
+    todos_table = browser.find_element(By.ID, "todos-table")
+    rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
+    rows_count = len(rows)
 
     #* create
     sample_todo = {
@@ -29,13 +31,13 @@ def test_crud_todo():
     browser.find_element(By.ID, "confirm-add-button").click()
 
     # check if todo modal is no longer visible
-    with pytest.raises(Exception):
-      browser.find_element(By.ID, "id_title")
+    assert not browser.find_element(By.ID, "id_title").is_displayed()
 
     todos_table = browser.find_element(By.ID, "todos-table")
     rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
 
     #* read
+    assert rows_count + 1 == len(rows)
     assert todos_table is not None and rows is not None
     assert sample_todo["title"] in rows[-1].text
 
@@ -44,27 +46,33 @@ def test_crud_todo():
       "title": "Updated To-Do",
       "description": "This was a sample to-do. Now it's updated."
     }
-    update_button = rows[-1].find_element(By.ID, "update-button")
+    details_button = rows[-1].find_element(By.ID, "details-button")
+    details_button.click()
+    browser.implicitly_wait(5)
+    update_button = browser.find_element(By.ID, "open-update-button")
     update_button.click()
     browser.implicitly_wait(5)
     input_title = browser.find_element(By.ID, "id_title")
     input_desc = browser.find_element(By.ID, "id_desc")
 
     # check if previous values are stored
-    assert input_title == sample_todo["title"]
-    assert input_desc == sample_todo["description"]
+    assert input_title.get_attribute("value")== sample_todo["title"]
+    assert input_desc.get_attribute("value") == sample_todo["description"]
 
     input_title.clear()
     input_desc.clear()
-    pytest.fail("Finish Test")
 
     input_title.send_keys(updated_todo["title"])
     input_desc.send_keys(updated_todo["description"])
 
     browser.find_element(By.ID, "confirm-update-button").click()
+    browser.find_element(By.ID, "go-back-button").click()
 
+    browser.implicitly_wait(5)
+    todos_table = browser.find_element(By.ID, "todos-table")
     rows = todos_table.find_elements(By.TAG_NAME, "tr")
     assert updated_todo["title"] in rows[-1].text
+    pytest.fail("Finish Test")
 
     #* delete
     rows_count = len(rows)
