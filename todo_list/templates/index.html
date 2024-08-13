@@ -30,7 +30,7 @@
         ></button>
       </div>
       <div class="modal-body">
-        <form action="#" method="post">
+        <form action={% url "add" %} method="post">
           {% csrf_token %} {{ form }}
           <input
             class="btn btn-primary mt-3"
