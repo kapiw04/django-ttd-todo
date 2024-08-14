@@ -2,11 +2,14 @@ from typing import List
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.firefox.options import Options
 import pytest
 
 @pytest.mark.django_db(transaction=True)
 def test_crud_todo():
-  with webdriver.Firefox() as browser:
+  options = Options()
+  options.add_argument("--headless")
+  with webdriver.Firefox(options=options) as browser:
     browser.get("http://localhost:8000")
 
     assert "To-Do List" in browser.title
@@ -83,4 +86,3 @@ def test_crud_todo():
     todos_table = browser.find_element(By.ID, "todos-table")
     rows = todos_table.find_elements(By.TAG_NAME, "tr")
     assert rows_count - 1 == len(rows)
-

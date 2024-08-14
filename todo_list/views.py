@@ -1,4 +1,5 @@
 from typing import Any
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, DeleteView, CreateView, UpdateView
 from todo_list.models import TodoItem
@@ -25,6 +26,10 @@ class TodoItemCreateView(CreateView):
   def get_success_url(self) -> str:
     return reverse_lazy("index")
   
+  def form_invalid(self, form):
+    response = HttpResponse("Error validating form")
+    response.status_code = 400
+    return response
 class TodoItemUpdateView(UpdateView):
   model = TodoItem
   fields = ["title", "desc"]
