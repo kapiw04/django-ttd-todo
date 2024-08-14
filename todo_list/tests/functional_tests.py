@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import NoSuchElementException
 import pytest
 
 @pytest.mark.django_db(transaction=True)
@@ -86,3 +87,56 @@ def test_crud_todo():
     todos_table = browser.find_element(By.ID, "todos-table")
     rows = todos_table.find_elements(By.TAG_NAME, "tr")
     assert rows_count - 1 == len(rows)
+
+@pytest.mark.django_db
+def test_checking_todo():
+  options = Options()
+  options.add_argument("--headless")
+  with webdriver.Firefox(options=options) as browser:
+    # adding sample todos
+    todos = [
+      {
+        "title": "Buy milk",
+        "desc": "No lactose",
+      },
+      {
+        "title": "Load the dishwasher",
+        "desc": "Then unload it after it's done!"
+      }
+    ]
+    browser.get("http://localhost:8000")
+    # add todos
+    for todo in todos:
+      browser.find_element(By.ID, "open-add-button").click()
+      browser.implicitly_wait(5)
+      input_title = browser.find_element(By.ID, "id_title")
+      input_desc = browser.find_element(By.ID, "id_desc")
+      
+      input_title.send_keys(todo["title"])
+
+      input_desc.send_keys(todo["desc"])
+
+      browser.find_element(By.ID, "confirm-add-button").click()
+    
+    todos_table = browser.find_element(By.ID, "todos-table")
+    rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
+
+    milk_todo, eggs_todo = rows[-2:]
+    milk_todo.find_element(By.ID, "check-button").click()
+
+    #* check the 'buy milk' task
+    todos_rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
+    assert len(todos_rows) < 2 or todos_rows[-2].text != todos[0]["title"]
+    assert todos_rows[-1].text == todos[1]["title"]
+
+    checked_rows = browser.find_element(By.ID, "checked-table").find_elements(By.TAG_NAME, "tr")
+    assert checked_rows[-1].text == todos[0]["title"]
+
+    #* uncheck the 'buy milk' task
+    checked_rows[-1].find_element(By.ID, "check-button").click()
+    checked_rows = browser.find_element(By.ID, "checked-table").find_elements(By.TAG_NAME, "tr")
+    assert checked_rows == []
+
+    todos_rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
+    assert todos_rows[-1].text == todos[0]["title"]
+    assert todos_rows[-2].text == todos[1]["title"]
