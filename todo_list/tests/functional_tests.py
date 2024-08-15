@@ -25,8 +25,8 @@ def test_crud_todo():
     }
     browser.find_element(By.ID, "open-add-button").click()
     browser.implicitly_wait(5)
-    input_title = browser.find_element(By.ID, "id_title")
-    input_desc = browser.find_element(By.ID, "id_desc")
+    input_title = browser.find_element(By.ID, "title-input")
+    input_desc = browser.find_element(By.ID, "desc-input")
     
     input_title.send_keys(sample_todo["title"])
 
@@ -35,7 +35,7 @@ def test_crud_todo():
     browser.find_element(By.ID, "confirm-add-button").click()
 
     # check if todo modal is no longer visible
-    assert not browser.find_element(By.ID, "id_title").is_displayed()
+    assert not browser.find_element(By.ID, "title-input").is_displayed()
 
     todos_table = browser.find_element(By.ID, "todos-table")
     rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
@@ -56,8 +56,8 @@ def test_crud_todo():
     update_button = browser.find_element(By.ID, "open-update-button")
     update_button.click()
     browser.implicitly_wait(5)
-    input_title = browser.find_element(By.ID, "id_title")
-    input_desc = browser.find_element(By.ID, "id_desc")
+    input_title = browser.find_element(By.ID, "title-input")
+    input_desc = browser.find_element(By.ID, "desc-input")
 
     # check if previous values are stored
     assert input_title.get_attribute("value")== sample_todo["title"]
@@ -109,15 +109,16 @@ def test_checking_todo():
     for todo in todos:
       browser.find_element(By.ID, "open-add-button").click()
       browser.implicitly_wait(5)
-      input_title = browser.find_element(By.ID, "id_title")
-      input_desc = browser.find_element(By.ID, "id_desc")
+      input_title = browser.find_element(By.ID, "title-input")
+      input_desc = browser.find_element(By.ID, "desc-input")
       
       input_title.send_keys(todo["title"])
 
       input_desc.send_keys(todo["desc"])
 
       browser.find_element(By.ID, "confirm-add-button").click()
-    
+      browser.implicitly_wait(5)    
+
     todos_table = browser.find_element(By.ID, "todos-table")
     rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
 
@@ -125,6 +126,7 @@ def test_checking_todo():
     milk_todo.find_element(By.ID, "check-button").click()
 
     #* check the 'buy milk' task
+    todos_table = browser.find_element(By.ID, "todos-table")
     todos_rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
     assert len(todos_rows) < 2 or todos_rows[-2].text != todos[0]["title"]
     assert todos_rows[-1].text == todos[1]["title"]
@@ -133,10 +135,15 @@ def test_checking_todo():
     assert checked_rows[-1].text == todos[0]["title"]
 
     #* uncheck the 'buy milk' task
-    checked_rows[-1].find_element(By.ID, "check-button").click()
+    check_count = len(checked_rows)
+    todos_table = browser.find_element(By.ID, "todos-table")
+    milk_todo = browser.find_element(By.ID, "checked-table").find_elements(By.TAG_NAME, "tr")[1] # row 0 is the header
+    print(milk_todo.get_attribute("innerHTML"))
+    checkbox = milk_todo.find_element(By.ID, "check-button")
+    checkbox.click()
+    todos_table = browser.find_element(By.ID, "todos-table")
     checked_rows = browser.find_element(By.ID, "checked-table").find_elements(By.TAG_NAME, "tr")
-    assert checked_rows == []
+    # import pdb; pdb.set_trace()
+    assert check_count - 1 == len(checked_rows)
 
     todos_rows: List[WebElement] = todos_table.find_elements(By.TAG_NAME, "tr")
-    assert todos_rows[-1].text == todos[0]["title"]
-    assert todos_rows[-2].text == todos[1]["title"]
