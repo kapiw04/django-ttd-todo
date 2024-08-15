@@ -31,7 +31,19 @@
       </div>
       <div class="modal-body">
         <form action={% url "add" %} method="post">
-          {% csrf_token %} {{ form }}
+          {% csrf_token %} 
+          <label for="id_title">
+            Title:
+          </label>
+        </br>
+          {{ form.title }}
+        </br>
+          <label for="id_desc">
+            Description:
+          </label>
+        </br >
+          {{ form.desc }}
+        </br>
           <input
             class="btn btn-primary mt-3"
             id="confirm-add-button"
@@ -49,20 +61,51 @@
   <thead>
     <tr>
       <th scope="col">Task</th>
-      <th scope="col">Status</th>
     </tr>
   </thead>
   <tbody>
     {% for task in tasks %}
     <tr>
       <td>
-        <a id="details-button" href="{% url 'details' task.id %}">
+        <a id="details-button" href={% url 'details' task.id %}>
           {{ task.title }}
         </a>
       </td>
-      <td>{% if task.completed %}Completed{% else %}Pending{% endif %}</td>
+      <td>
+        <form action={% url "complete" task.id %} method="post">
+          {% csrf_token %}
+          <input type="checkbox" name="completed" onchange="this.form.submit()" id="check-button" {% if task.completed %}checked{% endif %} value="true">
+        </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
+<!-- Checked Table -->
+<table id="checked-table" class="table table-striped mt-3">
+  <thead>
+    <tr>
+      <th scope="col">Done</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for task in completed %}
+    <tr>
+      <td>
+        <a id="details-button" href={% url 'details' task.id %}>
+          {{ task.title }}
+        </a>
+      </td>
+      <td>
+        <form action={% url "complete" task.id %} method="post">
+          {% csrf_token %}
+          <input type="checkbox" name="completed" onchange="this.form.submit()" id="check-button" {% if task.completed %}checked{% endif %} value="true">
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 {% endblock %}

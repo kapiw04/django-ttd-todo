@@ -1,5 +1,5 @@
 from typing import Any
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, DeleteView, CreateView, UpdateView
 from todo_list.models import TodoItem
@@ -12,36 +12,44 @@ class TodoItemListView(ListView):
 
   def get_context_data(self, **kwargs) -> dict[str, Any]:
     context = super().get_context_data(**kwargs)
-    context["tasks"] = TodoItem.objects.all() 
+    context["tasks"] = TodoItem.objects.filter(completed=False)
+    context["completed"] = TodoItem.objects.filter(completed=True)
     context["form"] = TodoItemForm()
     return context
   
 
 
-
 class TodoItemCreateView(CreateView):
   model = TodoItem
   fields = ["title", "desc"]
-
-  def get_success_url(self) -> str:
-    return reverse_lazy("index")
+  success_url = reverse_lazy("index") 
   
   def form_invalid(self, form):
-    response = HttpResponse("Error validating form")
+    response = HttpResponse("Error validating form: " + str(form.errors))
     response.status_code = 400
     return response
+  
 class TodoItemUpdateView(UpdateView):
   model = TodoItem
   fields = ["title", "desc"]
   pk_url_kwarg = "id"
+  success_url = reverse_lazy("index")
 
-  def get_success_url(self) -> str:
-    return reverse_lazy("index")
+  def form_invalid(self, form):
+    response = HttpResponse("Error validating form: " + str(form.errors))
+    response.status_code = 400
+    return response
   
+class TodoItemToggleCompleteView(UpdateView):
+  model = TodoItem
+  fields = ["completed"]
+  pk_url_kwarg = "id"
+  success_url = reverse_lazy("index")
+
 class TodoItemDeleteView(DeleteView):
   model = TodoItem  
-  success_url = reverse_lazy("index")
   pk_url_kwarg = "id"
+  success_url = reverse_lazy("index")
 
 class TodoItemDetailView(DetailView):
   model = TodoItem
